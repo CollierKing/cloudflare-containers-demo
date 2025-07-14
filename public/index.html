@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanic Survival Prediction</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚢</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+        }
+
+        .form-container {
+            text-align: left;
+            margin: 2rem 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #1e40af;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .radio-option:hover {
+            border-color: #1e40af;
+            background: #eff6ff;
+        }
+
+        .radio-option.selected {
+            border-color: #1e40af;
+            background: #1e40af;
+            color: white;
+        }
+
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: #1e40af;
+            color: white;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #1d4ed8;
+        }
+
+        .submit-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+
+        .result-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-survived {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .result-died {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-details {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1e40af;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚢 Titanic Survival Prediction</h1>
+        <p class="subtitle">Will you survive the Titanic? Enter passenger details to find out!</p>
+        
+        <form class="form-container" id="predictionForm">
+            <div class="form-group">
+                <label for="sex">Gender</label>
+                <div class="radio-group">
+                    <div class="radio-option" data-value="male">
+                        <input type="radio" name="sex" value="male" id="male">
+                        <span>👨 Male</span>
+                    </div>
+                    <div class="radio-option" data-value="female">
+                        <input type="radio" name="sex" value="female" id="female">
+                        <span>👩 Female</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input type="number" id="age" name="age" min="0" max="120" step="1" placeholder="Enter age (e.g., 25.5)" required>
+            </div>
+
+            <div class="form-group">
+                <label for="pclass">Passenger Class</label>
+                <select id="pclass" name="pclass" required>
+                    <option value="">Select passenger class</option>
+                    <option value="1">🥇 First Class</option>
+                    <option value="2">🥈 Second Class</option>
+                    <option value="3">🥉 Third Class</option>
+                </select>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                🔮 Predict Survival
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 1rem;">Making prediction...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="result-title" id="resultTitle"></div>
+            <div class="result-details" id="resultDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        // Handle radio button selection
+        document.querySelectorAll('.radio-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const radioGroup = this.parentElement;
+                const value = this.dataset.value;
+                
+                // Remove selected class from all options in this group
+                radioGroup.querySelectorAll('.radio-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked option
+                this.classList.add('selected');
+                
+                // Select the radio button
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+            });
+        });
+
+        // Handle form submission
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const sex = formData.get('sex');
+            const age = parseFloat(formData.get('age'));
+            const pclass = parseInt(formData.get('pclass'));
+            
+            // Validate form
+            if (!sex || !age || !pclass) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            // Prepare API payload
+            const payload = {
+                sex: sex,
+                age: age,
+                pclass: pclass
+            };
+            
+            // Show loading state
+            showLoading(true);
+            hideError();
+            hideResult();
+            
+            try {
+                // Make API call
+                const response = await fetch('/api/inference', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                
+                // Display result
+                showResult(result, payload);
+                
+            } catch (error) {
+                console.error('Prediction error:', error);
+                showError(`Prediction failed: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (show) {
+                loading.style.display = 'block';
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Predicting...';
+            } else {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🔮 Predict Survival';
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function showResult(result, inputData) {
+            const container = document.getElementById('resultContainer');
+            const title = document.getElementById('resultTitle');
+            const details = document.getElementById('resultDetails');
+            
+            const survived = result.prediction === 1;
+            const genderEmoji = inputData.sex === 'male' ? '👨' : '👩';
+            const classEmoji = inputData.pclass === 1 ? '🥇' : inputData.pclass === 2 ? '🥈' : '🥉';
+            
+            // Set result content
+            if (survived) {
+                title.textContent = '🎉 You Survived!';
+                details.innerHTML = `
+                    ${genderEmoji} ${inputData.sex.charAt(0).toUpperCase() + inputData.sex.slice(1)}, 
+                    Age ${inputData.age}, 
+                    ${classEmoji} Class ${inputData.pclass}
+                    <br><br>
+                    <strong>Congratulations!</strong> You would have survived the Titanic disaster.
+                `;
+                container.className = 'result-container result-survived';
+            } else {
+                title.textContent = '😢 You Did Not Survive';
+                details.innerHTML = `
+                    ${genderEmoji} ${inputData.sex.charAt(0).toUpperCase() + inputData.sex.slice(1)}, 
+                    Age ${inputData.age}, 
+                    ${classEmoji} Class ${inputData.pclass}
+                    <br><br>
+                    Unfortunately, you would not have survived the Titanic disaster.
+                `;
+                container.className = 'result-container result-died';
+            }
+            
+            container.style.display = 'block';
+        }
+
+        function hideResult() {
+            document.getElementById('resultContainer').style.display = 'none';
+        }
+    </script>
+
+    <footer style="text-align: center; margin-top: 2rem; padding: 1rem; color: rgba(255, 255, 255, 0.7);">
+        <a href="https://github.com/CollierKing/cloudflare-containers-demo" 
+           target="_blank" 
+           style="color: rgba(255, 255, 255, 0.8); text-decoration: none; font-size: 0.9rem; transition: color 0.3s ease;"
+           onmouseover="this.style.color='white'"
+           onmouseout="this.style.color='rgba(255, 255, 255, 0.8)'">
+            🔗 View Source Code on GitHub
+        </a>
+    </footer>
+</body>
+</html> 

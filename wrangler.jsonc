@@ -1,0 +1,48 @@
+{
+/** * For more details on how to configure Wrangler, refer to: * https://developers.cloudflare.com/workers/wrangler/configuration/ */
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "containers-demo",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-05-23",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "triggers": {
+    "crons": [
+      "*/2 * * * *"
+      // Run every 5 minutes
+    ]
+  },
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "containers": [
+    {
+      "class_name": "FastAPIContainer",
+      "image": "./Dockerfile",
+      "max_instances": 10,
+      "name": "containers-demo",
+      "instance_type": "standard"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "FastAPIContainer",
+        "name": "FASTAPI_CONTAINER"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "new_sqlite_classes": [
+        "FastAPIContainer"
+      ],
+      "tag": "v1"
+    }
+  ],
+}

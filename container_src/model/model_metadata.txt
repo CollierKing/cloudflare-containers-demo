@@ -1,0 +1,8 @@
+XGBoost Titanic Classifier
+=========================
+Original Features: sex_encoded, age, pclass
+ONNX Features: f0, f1, f2
+Model type: XGBoost Classifier
+Input shape: [batch_size, 3]
+Output: Binary classification (0=died, 1=survived)
+Feature encoding: f0=sex_encoded (0=female, 1=male), f1=age, f2=pclass

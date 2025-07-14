@@ -1,0 +1,5 @@
+Feature Name Mapping (for ONNX model):
+=====================================
+f0: sex_encoded
+f1: age
+f2: pclass

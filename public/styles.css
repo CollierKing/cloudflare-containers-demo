@@ -1,0 +1,8 @@
+/* Demo CSS file for static assets */
+.demo-class {
+    color: #667eea;
+    font-weight: bold;
+}
+
+/* This CSS file demonstrates static asset serving */
+/* It can be referenced in HTML files with <link rel="stylesheet" href="/styles.css"> */ 
